@@ -49,15 +49,11 @@ Route::get('/test', function () {
     return response()->json(['success' => 'Event fired']); // This will just return a simple success message
 });
 
-
 Auth::routes();
 
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index'); 
 Route::get('/shop/{product_slug}', [ShopController::class, 'product_details'])->name('shop.product.details');
-
-
-
 
 Route::get('/rentals', [RentalController::class, 'index'])->name('rentals.index');
 Route::get('/rentals/{rental_slug}', [RentalController::class, 'show'])->name('rentals.details');
@@ -66,10 +62,8 @@ Route::post('/rentals/{rental_id}/checkout', [RentalController::class, 'checkout
 Route::get('/rentals/{rental_id}/checkout', [RentalController::class, 'checkout'])->name('rentals.checkout');
 Route::get('/rentals/{rental_id}/process/checkout', [RentalController::class, 'processCheckout'])->name('rentals.process.checkout');
 
-
 Route::post('/reserve/{rentalId}', [RentalController::class, 'placeReservation'])->name('rentals.reserve.events');
 
-// Route::get('/checkout/{rental_id}', [RentalController::class, 'checkout'])->name('rentals.checkout');
 Route::get('/api/check-pool-capacity/{rentalId}/{date}', [RentalController::class, 'checkPoolCapacity'])->name('check.pool.capacity');
 Route::get('/api/rentals/{rentalId}/reservations', [RentalController::class, 'getReservations']);
 Route::get('/rental/checkout/{rentalId}/reservations', [RentalController::class, 'getReservations'])->name('rental.checkout');
@@ -89,8 +83,6 @@ Route::delete('/cart/clear', [CartController::class, 'empty_cart'])->name('cart.
 Route::get('/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 Route::post('/place-an-order', [CartController::class, 'place_an_order'])->name('cart.place.an.order');
 
-
-
 Route::get('/order-confirmation', [CartController::class, 'order_confirmation'])->name('cart.order.confirmation');
 
 Route::get('/preorders/accept/{preOrder}', [CartController::class, 'acceptPreOrder'])->name('preorders.accept');
@@ -106,8 +98,6 @@ Route::post('/contact-us', [HomeController::class, 'contact_store'])->name('home
 
 Route::get('/search', [HomeController::class, 'search'])->name('home.search');
 
-
-
 Route::middleware(['auth'])->group(function () {
     Route::get('/account-dashboard', [UserController::class, 'index'])->name('user.index');
     Route::get('/account-order', [UserController::class, 'orders'])->name('user.orders');
@@ -117,8 +107,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/profile', [UserController::class, 'show_profile'])->name('user.profile');
     Route::get('/user/profile/edit/{id}', [UserController::class, 'profile_edit'])->name('user.profile.edit');
     Route::put('/user/profile/update', [UserController::class, 'profile_update'])->name('user.profile.update');
-    // Route::get('user/profile/edit/{id}', [UserController::class, 'edit'])->name('user.profile.edit');
-
 
     Route::get('/user/profile-image/edit', [UserController::class, 'profile_image_edit'])->name('user.profile.image.edit');
     Route::put('/user/profile-image/update', [UserController::class, 'profile_image_update'])->name('user.profile.image.update');
@@ -127,28 +115,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/order-history', [UserController::class, 'order_history'])->name('user.order.history');
     Route::get('/reservation-history', [UserController::class, 'reservation_history'])->name('user.reservation.history');
     
-
     Route::get('/user/reservation', [UserController::class, 'account_reservation'])->name('user.reservation');
     Route::get('/user/reservation-details/{reservation_id}', [UserController::class, 'account_reservation_details'])->name('user.reservation-details');
-
-
 
     Route::post('/user/reservation-details/cancel-reservation', [UserController::class, 'account_cancel_reservation'])->name('user.account_cancel_reservation');
     Route::get('/api/check-pool-capacity/{rentalId}/{quantity}', [RentalController::class, 'checkPoolCapacity']);
 
-
-
-
-
-
     Route::get('/account-rentals', [UserController::class, 'account_rentals'])->name('user.account.rentals');
 });
 
-
-
 Route::get('password/set', [PasswordController::class, 'showSetPasswordForm'])->name('password.set');
 Route::post('password/set', [PasswordController::class, 'setPassword']);
-
 
 Route::middleware(['auth', AuthAdmin::class])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
@@ -159,10 +136,8 @@ Route::middleware(['auth', AuthAdmin::class])->group(function () {
     Route::put('/admin/category/update', [AdminController::class, 'category_update'])->name('admin.category.update');
     Route::delete('/admin/category/{id}/delete', [AdminController::class, 'category_delete'])->name('admin.category.delete');
 
-
     // Profile for the admin 
     Route::get('/admin/profile', [AdminProfileController::class, 'show_profile'])->name('admin.profile.index');    
-
 
     Route::get('/admin/products', [AdminController::class, 'products'])->name('admin.products');
     Route::get('/admin/product/add', [AdminController::class, 'product_add'])->name('admin.product.add');
@@ -183,18 +158,15 @@ Route::middleware(['auth', AuthAdmin::class])->group(function () {
     Route::put('/admin/product-attribute/update', [AdminController::class, 'product_attribute_update'])->name('admin.product.attribute.update');
     Route::delete('/admin/product-attribute/{id}/delete', [AdminController::class, 'product_attribute_delete'])->name('admin.product.attribute.delete');
 
-
     Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
     Route::get('/orders/filter', [AdminController::class, 'order_filter'])->name('orders.filter');
     Route::get('/admin/filter-reservations', [AdminController::class, 'filterReservations']);
-
 
     Route::get('/admin/order/{order_id}/details', [AdminController::class, 'order_details'])->name('admin.order.details');
     // Route::get('/admin/order/{order_id}/details', [AdminController::class, 'showOrderDetails'])->name('admin.order.details');
     Route::put('/admin/order/update-status', [AdminController::class, 'update_order_status'])->name('admin.order.status.update');
     Route::get('/admin/orders/filter', [AdminController::class, 'filterOrders'])->name('admin.orders.filter');
     
-
     Route::get('/admin/slide', [AdminController::class, 'slides'])->name('admin.slides');
     Route::get('/admin/slide/add', [AdminController::class, 'slide_add'])->name('admin.slide.add');
     Route::post('/admin/slide/store', [AdminController::class, 'slide_store'])->name('admin.slide.store');
@@ -214,10 +186,6 @@ Route::middleware(['auth', AuthAdmin::class])->group(function () {
     Route::post('/notifications/delete-multiple', [AdminController::class, 'deleteMultipleNotifications']);
     Route::get('/notifications/latest', [AdminController::class, 'latest']);
 
-
-    
-
-
     Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
     Route::get('/user/filter', [AdminController::class, 'filter'])->name('admin.users.filter');
     Route::get('/user/search', [AdminController::class, 'search'])->name('admin.users.search');
@@ -228,7 +196,6 @@ Route::middleware(['auth', AuthAdmin::class])->group(function () {
     Route::post('/admin/store', [AdminController::class, 'users_store'])->name('admin.users.store');
     
     Route::get('/admin/search', [AdminController::class, 'searchproduct'])->name('admin.searchproduct');
-
 
     Route::get('/admin/index-weekly', [AdminController::class, 'indexWeekly'])->name('admin.index-weekly');
     Route::get('/admin/getWeeklyData', [AdminController::class, 'getWeeklyData'])->name('admin.getWeeklyData');
@@ -241,8 +208,6 @@ Route::middleware(['auth', AuthAdmin::class])->group(function () {
     Route::get('/admin/report-statements', [AdminController::class, 'listBillingStatements'])->name('admin.report-statements');
     Route::get('/admin/report-statement/{orderId}', [AdminController::class, 'generateBillingStatement'])->name('admin.report-statement');
     
-
-    
     Route::get('/user-reports', [AdminController::class, 'showUserReports'])->name('admin.user-reports');
     Route::post('/user-reports/generate', [AdminController::class, 'generateUserReports'])->name('admin.user-reports.generate');
     Route::post('/admin/sales-report', [AdminController::class, 'generateInputSales'])->name('admin.generate-input-sales');
@@ -254,16 +219,6 @@ Route::middleware(['auth', AuthAdmin::class])->group(function () {
     Route::post('/rentals-reports/generate', [AdminController::class, 'generateInputRentalReports'])->name('admin.generate-input-rentals-reports');
     Route::get('/rentals-reports', function () {return view('admin.input-rentals-reports');})->name('admin.rentals-reports');
     Route::post('/rentals-reports/download', [AdminController::class, 'downloadInputRentalsReports'])->name('admin.download-input-rentals-reports');
-
-
-
-
-
-
-
-
-
-
 
     Route::get('/admin/report-statement/{orderId}', [AdminController::class, 'generateBillingStatement'])->name('admin.report-statement');
     Route::get('/admin/report-statements/download', [AdminController::class, 'downloadBillingStatements'])->name('admin.report-statements.download');
@@ -283,26 +238,16 @@ Route::middleware(['auth', AuthAdmin::class])->group(function () {
     Route::get('admin/rentals-reports-name', [AdminController::class, 'rentalsReportsName'])->name('admin.rentalsReportsName');
     Route::post('admin/download-pdf-rentals-name', [AdminController::class, 'downloadPdfRentalsName'])->name('admin.downloadPdfRentalsName');
     Route::get('/admin/report-product/download', [AdminController::class, 'downloadProduct'])->name('admin.report-product.download');
-    
-
-    
-
 
     Route::get('/admin/reservation/{reservation_id}/events', [AdminController::class, 'event_items'])->name('admin.reservation-events');
     Route::get('/admin/reservation-history/{reservation_id}', [AdminController::class, 'reservationHistory'])->name('admin.reservation-history');
     Route::post('/admin/update-reservation-status/', [AdminController::class, 'updateStatus'])->name('admin.updateReservationStatus');
     Route::post('/admin/update-payment-status', [AdminController::class, 'updatePaymentStatus'])->name('admin.updatePaymentStatus');
-    // Route::post('/admin/reservation/{reservation}/update-status', [AdminController::class, 'updateStatus'])->name('admin.update-status');
-    // Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.reservatioiindex');
+    Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.reservatioiindex');
 
     Route::post('/admin/reservation/{reservation_id}/update-status', [AdminController::class, 'updateReservationStatus'])->name('admin.update-reservation-status');
 
-
     Route::get('/admin/reservation', [AdminController::class, 'reservations'])->name('admin.reservation');
- 
-    
-    
-    
 
     Route::prefix('admin')->group(function () {
         Route::prefix('facilities')->group(function () {
@@ -311,10 +256,7 @@ Route::middleware(['auth', AuthAdmin::class])->group(function () {
             Route::post('/store', [FacilityController::class, 'store'])->name('admin.facilities.store');
 
             Route::put('/update', [AdminController::class, 'update'])->name('admin.facilities.update');
-
-
         });
     });
     
 });
-
