@@ -25,29 +25,6 @@ use App\Http\Controllers\AdminProfileController;
 
 Auth::routes(['reset' => true]);
 
-Route::get('/test', function () {
-    $product = Product::with('attributeValues')->find(4); // Adjust the product ID as necessary
-
-    if (!$product) {
-        Log::error('Product with ID 4 not found!');
-        return response()->json(['error' => 'Product not found'], 404);
-    }
-
-    // Log the attribute values for debugging
-    Log::info('Attribute Values for product: ', $product->attributeValues->toArray());
-
-    // Determine quantity
-    $quantity = $product->attributeValues->isNotEmpty() 
-        ? $product->attributeValues->sum('quantity') // Aggregate quantities
-        : $product->quantity; // Use main quantity if no variants
-
-    Log::info('Low stock alert for product: ' . $product->name . ', Quantity: ' . $quantity);
-
-    // Dispatch the event with product and determined quantity
-    event(new LowStockEvent($product, $quantity));
-
-    return response()->json(['success' => 'Event fired']); // This will just return a simple success message
-});
 
 
 Auth::routes();
