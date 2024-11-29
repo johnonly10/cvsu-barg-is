@@ -555,14 +555,9 @@ class AdminController extends Controller
         $product->featured = $request->featured;
         $product->sex = $request->sex;
         $product->category_id = $request->category_id;
-
-        // **Assign the New Stock Status Fields to the Product**
-        // $product->instock_quantity = $request->instock_quantity;
         $product->reorder_quantity = $request->reorder_quantity;
         $product->outofstock_quantity = $request->outofstock_quantity;
         $current_timestamp = Carbon::now()->timestamp;
-
-
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imageName = $current_timestamp . '.' . $image->extension();
@@ -570,7 +565,6 @@ class AdminController extends Controller
             $product->image = $imageName;
         }
 
-        // Handle gallery images upload
         $gallery_arr = [];
         $gallery_images = "";
         $counter = 1;
@@ -597,31 +591,6 @@ class AdminController extends Controller
         $product->save();
 
         // Handle variants
-        // if ($hasVariant && is_array($request->variant_name)) {
-        //     $attributeValues = [];
-        //     foreach ($request->variant_name as $index => $variantName) {
-        //         $attributeValues[] = [
-        //             'product_id' => $product->id,
-        //             'product_attribute_id' => $request->product_attribute_id[$index],
-        //             'value' => $variantName,
-        //             'price' => $request->variant_price[$index],
-        //             'quantity' => $request->variant_quantity[$index],
-        //             'stock_status' => $request->variant_stock_status[$index] ?? 'instock',
-        //         ];
-        //     }
-
-        //     foreach ($attributeValues as $value) {
-        //         ProductAttributeValue::updateOrCreate(
-        //             [
-        //                 'product_id' => $value['product_id'],
-        //                 'product_attribute_id' => $value['product_attribute_id'],
-        //                 'value' => $value['value']
-        //             ],
-        //             $value
-        //         );
-        //     }
-
-        // Handle variants
         if ($hasVariant && is_array($request->variant_name)) {
             $attributeValues = [];
             foreach ($request->variant_name as $index => $variantName) {
@@ -638,7 +607,6 @@ class AdminController extends Controller
                 ProductAttributeValue::create($value);
             }
 
-            // $totalVariantQuantity = $product->attributeValues->sum('quantity');
 
             $totalVariantQuantity = collect($attributeValues)->sum('quantity');
 
@@ -1102,7 +1070,7 @@ class AdminController extends Controller
         $reply = new ContactReplies();
         $reply->contact_id = $contact->id;
         $reply->admin_reply = $request->input('replyMessage');
-        $reply->admin_id = auth()->id(); // Assuming the admin is logged in
+        $reply->admin_id = Auth::id();// Assuming the admin is logged in
         $reply->save();
 
         // Optionally, send an email to the user
@@ -1165,43 +1133,39 @@ class AdminController extends Controller
     
 
     public function latest()
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    $notifications = $user->notifications()
-        ->orderBy('created_at', 'desc')
-        ->take(10) // Fetch the latest 10 notifications
-        ->get();
+        $notifications = $user->notifications()
+            ->orderBy('created_at', 'desc')
+            ->take(10) // Fetch the latest 10 notifications
+            ->get();
 
-    $formattedNotifications = $notifications->map(function ($notification) {
-        return [
-            'id' => $notification->id,
-            'message' => $notification->data['message'] ?? 'No message available',
-            'icon' => match ($notification->type) {
-                'App\\Notifications\\LowStockNotification' => 'fa-solid fa-box',
-                'App\\Notifications\\ContactReceivedMessage' => 'fas fa-envelope',
-                default => 'fas fa-bell',
-            },
-            'redirect_route' => match ($notification->type) {
-                'App\\Notifications\\LowStockNotification' => route('admin.products'),
-                'App\\Notifications\\ContactReceivedMessage' => route('admin.contacts'),
-                default => '#',
-            },
-            'created_at' => $notification->created_at->diffForHumans(),
-            'read_at' => $notification->read_at,
-        ];
-    });
+        $formattedNotifications = $notifications->map(function ($notification) {
+            return [
+                'id' => $notification->id,
+                'message' => $notification->data['message'] ?? 'No message available',
+                'icon' => match ($notification->type) {
+                    'App\\Notifications\\LowStockNotification' => 'fa-solid fa-box',
+                    'App\\Notifications\\ContactReceivedMessage' => 'fas fa-envelope',
+                    default => 'fas fa-bell',
+                },
+                'redirect_route' => match ($notification->type) {
+                    'App\\Notifications\\LowStockNotification' => route('admin.products'),
+                    'App\\Notifications\\ContactReceivedMessage' => route('admin.contacts'),
+                    default => '#',
+                },
+                'created_at' => $notification->created_at->diffForHumans(),
+                'read_at' => $notification->read_at,
+            ];
+        });
 
-    return response()->json([
-        'unreadCount' => $user->unreadNotifications->count(),
-        'notifications' => $formattedNotifications,
-    ]);
-}
+        return response()->json([
+            'unreadCount' => $user->unreadNotifications->count(),
+            'notifications' => $formattedNotifications,
+        ]);
+    }
 
-    
-
-    
-    // Delete multiple notifications
     public function deleteMultipleNotifications(Request $request)
     {
         $notificationIds = $request->input('notification_ids');
@@ -1211,7 +1175,6 @@ class AdminController extends Controller
             'status' => 'success',
         ]);
     }
-    
     // Reports Page
     public function generateReport(Request $request)
     {

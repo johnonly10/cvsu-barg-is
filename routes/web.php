@@ -154,8 +154,6 @@ Route::middleware(['auth', AuthAdmin::class])->group(function () {
     Route::get('/admin/contact', [AdminController::class, 'contacts'])->name('admin.contacts');
     Route::delete('/admin/contact/{id}/delete', [AdminController::class, 'contact_delete'])->name('admin.contact.delete');
     Route::post('/admin/contact/{id}/reply', [AdminController::class, 'contact_reply'])->name('admin.contact.reply');
-    // Route::post('/notifications/{id}/mark-read', [AdminController::class, 'markAsRead']);
-    // Route::post('/notifications/mark-read-multiple', [AdminController::class, 'markMultipleAsRead']);
     Route::get('/notifications/count', [AdminController::class, 'getUnreadNotificationCount']);
     Route::post('/notifications/mark-read-multiple', [AdminController::class, 'markMultipleAsRead']);
     Route::post('/notifications/mark-read/{id}', [AdminController::class, 'markAsRead']);
@@ -220,7 +218,7 @@ Route::middleware(['auth', AuthAdmin::class])->group(function () {
     Route::get('/admin/reservation-history/{reservation_id}', [AdminController::class, 'reservationHistory'])->name('admin.reservation-history');
     Route::post('/admin/update-reservation-status/', [AdminController::class, 'updateStatus'])->name('admin.updateReservationStatus');
     Route::post('/admin/update-payment-status', [AdminController::class, 'updatePaymentStatus'])->name('admin.updatePaymentStatus');
-    Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.reservatioiindex');
+    // Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations.reservatioiindex');
 
     Route::post('/admin/reservation/{reservation_id}/update-status', [AdminController::class, 'updateReservationStatus'])->name('admin.update-reservation-status');
 

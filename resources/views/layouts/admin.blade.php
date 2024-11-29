@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="{{ asset('assets/icon/style.css') }} ">
     {{-- <link rel="stylesheet" type="text/css" href="{{asset('css/sweetalert.min.css')}}"> --}}
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/custom.css') }} ">
+    <script src="{{asset('js/updatenotif.js')}}"></script>
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -63,7 +64,6 @@
                 console.error('Product data is missing:', data);
             }
 
-            // Increment notification count locally
             updateNotificationCountAndList();
         });
 
@@ -74,77 +74,9 @@
                 `New message from ${contactMessage.name} (${contactMessage.email}): ${contactMessage.message}`
             );
 
-            // Increment notification count locally
             updateNotificationCountAndList();
         });
 
-        function updateNotificationCountAndList() {
-            console.log('Fetching updated notification count and list...');
-            $.ajax({
-                url: '/notifications/latest', // Backend endpoint to fetch notifications
-                method: 'GET',
-                success: function(response) {
-                    console.log('Notifications fetched:', response);
-
-                    // Update notification count
-                    if (response.unreadCount !== undefined) {
-                        if (response.unreadCount > 0) {
-                            $('.notification-count').text(response.unreadCount).show();
-                        } else {
-                            $('.notification-count').text('').hide();
-                        }
-                    }
-
-                    // Update notification list
-                    const notificationList = $('#notifications-list');
-
-                    // Preserve the "Select All" section
-                    const selectAllSection = notificationList.find('.select-all').detach();
-
-                    // Clear only the dynamic notification items
-                    notificationList.empty();
-
-                    // Re-add the preserved "Select All" section
-                    notificationList.append(selectAllSection);
-
-                    // Add the latest notifications
-                    if (response.notifications && response.notifications.length > 0) {
-                        response.notifications.forEach(notification => {
-                            const isUnread = notification.read_at === null;
-                            const iconClass = notification.icon ||
-                            'fas fa-bell'; // Default icon if not provided
-                            const notificationHtml = `
-                        <li class="message-item notification-item ${isUnread ? 'unread' : 'read'}"
-                            data-notification-id="${notification.id}">
-                            <input type="checkbox" class="notification-checkbox" />
-                            <div class="image">
-                                <i class="${iconClass}"></i>
-                            </div>
-                            <div class="notification-content">
-                                <a href="${notification.redirect_route || '#'}" class="notification-link">
-                                    <div class="body-title-2 ${isUnread ? 'text-warning' : 'text-muted'}">
-                                        ${notification.message}
-                                    </div>
-                                </a>
-                                <div class="text-tiny ${isUnread ? '' : 'text-muted'}">
-                                    ${notification.created_at}
-                                </div>
-                            </div>
-                        </li>
-                    `;
-                            notificationList.append(notificationHtml);
-                        });
-                    } else {
-                        notificationList.append(
-                            '<li class="no-notifications"><div class="text-tiny">No unread notifications</div></li>'
-                            );
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Error fetching notifications:', xhr.responseText);
-                },
-            });
-        }
     </script>
 
     <style>
@@ -196,7 +128,6 @@
                         </div>
                         <div class="center-item">
                             <ul class="menu-list">
-
                                 <li class="menu-item has-children">
                                     <a href="javascript:void(0);" class="menu-item-button">
                                         <div class="icon"><i class="icon-shopping-bag"></i></div>
@@ -226,9 +157,10 @@
                                         </li>
                                     </ul>
                                 </li>
-
                                 {{-- Admin Menu Items --}}
                                 @if (auth()->user()->utype === 'ADM')
+
+
                                     <li class="menu-item has-children">
                                         <a href="javascript:void(0);" class="menu-item-button">
                                             <div class="icon"><i class="icon-layers"></i></div>
@@ -397,7 +329,7 @@
                                                     <div class="text">Sales Input Reports</div>
                                                 </a>
                                             </li>
-                                            
+
                                             <li class="sub-menu-item">
                                                 <a href="{{ route('admin.rentalsReportsName') }}">
                                                     <div class="text">Reservation Reports</div>
@@ -532,64 +464,72 @@
 
                                 <div class="popup-wrap user type-header">
                                     <div class="dropdown">
-                                        @if (Auth::check() && Auth::user()->utype == 'ADM' || Auth::check() && Auth::user()->utype == 'DIR')
-                                        <div class="popup-wrap user type-header">
-                                            <div class="dropdown">
-                                                <!-- Dropdown Button -->
-                                                <button class="btn btn-secondary dropdown-toggle" type="button"
-                                                        id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <span class="header-user wg-user d-flex align-items-center">
-                                                        <span class="image">
-                                                            @if(Auth::user()->profile_image)
-                                                                <img src="{{ asset('storage/' . Auth::user()->profile_image) }}" alt="Profile Image"
-                                                                     class="img-fluid rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
-                                                            @else
-                                                                <img src="{{ asset('images/profile.jpg') }}" alt="Default Profile Image"
-                                                                     class="img-fluid rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
-                                                            @endif
-                                                        </span>
-                                                        <span class="flex flex-column ms-2">
-                                                            <span class="body-title mb-2">{{ strtok(Auth::user()->name, ' ') }}</span>
-                                                            <span class="text-tiny">
-                                                                @if(Auth::user()->utype === 'ADM')
-                                                                Admin
-                                                                @elseif(Auth::user()->utype === 'DIR')
-                                                                Director
+                                        @if ((Auth::check() && Auth::user()->utype == 'ADM') || (Auth::check() && Auth::user()->utype == 'DIR'))
+                                            <div class="popup-wrap user type-header">
+                                                <div class="dropdown">
+                                                    <!-- Dropdown Button -->
+                                                    <button class="btn btn-secondary dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton3" data-bs-toggle="dropdown"
+                                                        aria-expanded="false">
+                                                        <span class="header-user wg-user d-flex align-items-center">
+                                                            <span class="image">
+                                                                @if (Auth::user()->profile_image)
+                                                                    <img src="{{ asset('storage/' . Auth::user()->profile_image) }}"
+                                                                        alt="Profile Image"
+                                                                        class="img-fluid rounded-circle"
+                                                                        style="width: 40px; height: 40px; object-fit: cover;">
+                                                                @else
+                                                                    <img src="{{ asset('images/profile.jpg') }}"
+                                                                        alt="Default Profile Image"
+                                                                        class="img-fluid rounded-circle"
+                                                                        style="width: 40px; height: 40px; object-fit: cover;">
                                                                 @endif
                                                             </span>
+                                                            <span class="flex flex-column ms-2">
+                                                                <span
+                                                                    class="body-title mb-2">{{ strtok(Auth::user()->name, ' ') }}</span>
+                                                                <span class="text-tiny">
+                                                                    @if (Auth::user()->utype === 'ADM')
+                                                                        Admin
+                                                                    @elseif(Auth::user()->utype === 'DIR')
+                                                                        Director
+                                                                    @endif
+                                                                </span>
+                                                            </span>
                                                         </span>
-                                                    </span>
-                                                </button>
-                                    
-                                                <!-- Dropdown Menu -->
-                                                <ul class="dropdown-menu dropdown-menu-end has-content"
-                                                    aria-labelledby="dropdownMenuButton3">
-                                                    <li>
-                                                        <a href="{{route('admin.profile.index')}}" class="user-item">
-                                                            <div class="icon">
-                                                                <i class="icon-user"></i>
-                                                            </div>
-                                                            <div class="body-title-2">Account</div>
-                                                        </a>
-                                                    </li>
-                                    
-                                                    <li>
-                                                        <form action="{{ route('logout') }}" method="POST" id="logout-form">
-                                                            @csrf
-                                                            <a href="{{ route('logout') }}" class="user-item"
-                                                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                                    </button>
+
+                                                    <!-- Dropdown Menu -->
+                                                    <ul class="dropdown-menu dropdown-menu-end has-content"
+                                                        aria-labelledby="dropdownMenuButton3">
+                                                        <li>
+                                                            <a href="{{ route('admin.profile.index') }}"
+                                                                class="user-item">
                                                                 <div class="icon">
-                                                                    <i class="icon-log-out"></i>
+                                                                    <i class="icon-user"></i>
                                                                 </div>
-                                                                <div class="body-title-2">Log out</div>
+                                                                <div class="body-title-2">Account</div>
                                                             </a>
-                                                        </form>
-                                                    </li>
-                                                </ul>
+                                                        </li>
+
+                                                        <li>
+                                                            <form action="{{ route('logout') }}" method="POST"
+                                                                id="logout-form">
+                                                                @csrf
+                                                                <a href="{{ route('logout') }}" class="user-item"
+                                                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                                                    <div class="icon">
+                                                                        <i class="icon-log-out"></i>
+                                                                    </div>
+                                                                    <div class="body-title-2">Log out</div>
+                                                                </a>
+                                                            </form>
+                                                        </li>
+                                                    </ul>
+                                                </div>
                                             </div>
-                                        </div>
-                                    @endif
-                                    
+                                        @endif
+
                                     </div>
                                 </div>
 
@@ -620,6 +560,7 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+    @stack('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchQuery');
@@ -656,7 +597,6 @@
             const notificationCount = $('.notification-count');
             const notificationList = $('#notifications-list');
 
-            // CSRF token setup for AJAX requests
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -669,20 +609,47 @@
                 $('.notification-checkbox').prop('checked', isChecked);
             });
 
-            // Handle "Mark Selected" button click
             $('#mark-all-as-read-btn').on('click', function() {
-                const unreadIds = $('.notification-item.unread').map(function() {
-                    return $(this).data('notification-id');
-                }).get();
+                const selectedIds = $('.notification-checkbox:checked')
+                    .map(function() {
+                        return $(this).closest('.notification-item').data('notification-id');
+                    })
+                    .get();
 
-                console.log('Mark All as Read clicked. Unread IDs:', unreadIds);
-
-                if (unreadIds.length > 0) {
-                    markMultipleAsRead(unreadIds);
-                } else {
-                    alert('No unread notifications to mark as read.');
+                if (selectedIds.length === 0) {
+                    alert('No notifications selected.');
+                    return;
                 }
+
+                $.ajax({
+                    url: '/notifications/mark-read-multiple',
+                    method: 'POST',
+                    data: {
+                        notification_ids: selectedIds
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            selectedIds.forEach(id => {
+                                const notification = $(
+                                    `.notification-item[data-notification-id="${id}"]`
+                                );
+                                notification.removeClass('unread').addClass('read');
+                                notification.find('.body-title-2').removeClass(
+                                    'text-warning').addClass('text-muted');
+                            });
+
+                            // Update the unread count
+                            updateNotificationCount(response.unreadCount);
+                        } else {
+                            console.error('Error in response:', response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error marking notifications as read:', xhr.responseText);
+                    },
+                });
             });
+
 
             // Handle "Delete Selected" button click
             $('#delete-selected-btn').on('click', function() {
@@ -747,6 +714,11 @@
 
             // Delete selected notifications
             function deleteMultipleNotifications(notificationIds) {
+                if (notificationIds.length === 0) {
+                    alert('No notifications selected.');
+                    return;
+                }
+
                 $.ajax({
                     url: '/notifications/delete-multiple',
                     method: 'POST',
@@ -755,7 +727,8 @@
                     },
                     success: function(response) {
                         if (response.status === 'success') {
-                            notificationIds.forEach(function(id) {
+                            // Remove deleted notifications from the DOM
+                            notificationIds.forEach(id => {
                                 $(`.notification-item[data-notification-id="${id}"]`).fadeOut(
                                     300,
                                     function() {
@@ -763,15 +736,19 @@
                                     });
                             });
 
-                            updateNotificationCount();
+                            updateNotificationCountAndList();
+                            // Reset notification count immediately
+                            updateNotificationCount(0);
+
                         }
                     },
                     error: function(xhr) {
                         console.error('Error deleting notifications:', xhr.responseText);
                         alert('Failed to delete notifications. Please try again.');
-                    }
+                    },
                 });
             }
+
 
             // Update notification count dynamically
             function updateNotificationCount(unreadCount) {
@@ -784,13 +761,11 @@
                 }
             }
 
-
         });
     </script>
 
 
 
-    @stack('scripts')
 </body>
 
 </html>
